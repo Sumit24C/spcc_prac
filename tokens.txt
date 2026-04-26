@@ -1,0 +1,24 @@
+Lexeme: #include<stdio.h> Token: HEADER
+Lexeme: int Token: KEYWORDS
+Lexeme: main Token: IDENTIFIER
+Lexeme: ( Token: SEPERATORS
+Lexeme: ) Token: SEPERATORS
+Lexeme: { Token: SEPERATORS
+Lexeme: int Token: KEYWORDS
+Lexeme: a Token: IDENTIFIER
+Lexeme: , Token: SEPERATORS
+Lexeme: b Token: IDENTIFIER
+Lexeme: = Token: OPERATORS
+Lexeme: 50 Token: NUMBERS
+Lexeme: ; Token: SEPERATORS
+Lexeme: "\n Welcome" Token: STRING_LITERALS
+Lexeme: printf Token: IDENTIFIER
+Lexeme: ( Token: SEPERATORS
+Lexeme: ) Token: SEPERATORS
+Lexeme: ; Token: SEPERATORS
+Lexeme:     // sample input Token : COMMENT
+Lexeme: getch Token: IDENTIFIER
+Lexeme: ( Token: SEPERATORS
+Lexeme: ) Token: SEPERATORS
+Lexeme: ; Token: SEPERATORS
+Lexeme: } Token: SEPERATORS
