@@ -9,7 +9,7 @@ Lexeme: a Token: IDENTIFIER
 Lexeme: , Token: SEPERATORS
 Lexeme: b Token: IDENTIFIER
 Lexeme: = Token: OPERATORS
-Lexeme: 50 Token: NUMBERS
+Lexeme: 5 Token: NUMBERS
 Lexeme: ; Token: SEPERATORS
 Lexeme: "\n Welcome" Token: STRING_LITERALS
 Lexeme: printf Token: IDENTIFIER
@@ -17,6 +17,18 @@ Lexeme: ( Token: SEPERATORS
 Lexeme: ) Token: SEPERATORS
 Lexeme: ; Token: SEPERATORS
 Lexeme:     // sample input Token : COMMENT
+Lexeme: while Token: KEYWORDS
+Lexeme: ( Token: SEPERATORS
+Lexeme: a Token: IDENTIFIER
+Lexeme: > Token: OPERATORS
+Lexeme: 0 Token: NUMBERS
+Lexeme: ) Token: SEPERATORS
+Lexeme: { Token: SEPERATORS
+Lexeme: a Token: IDENTIFIER
+Lexeme: - Token: OPERATORS
+Lexeme: - Token: OPERATORS
+Lexeme: ; Token: SEPERATORS
+Lexeme: } Token: SEPERATORS
 Lexeme: getch Token: IDENTIFIER
 Lexeme: ( Token: SEPERATORS
 Lexeme: ) Token: SEPERATORS

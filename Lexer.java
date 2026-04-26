@@ -57,25 +57,18 @@ public class Lexer {
 
                 if (token.isEmpty())
                     continue;
-
                 if (keywords.contains(token)) {
                     bw.write("Lexeme: " + token + " Token: KEYWORDS\n");
-
-                } else if (token.matches("\\d+(\\.\\d+)?")) {
+                } else if (token.matches("0|[1-9]\\d*(\\.\\d+)?")) {
                     bw.write("Lexeme: " + token + " Token: NUMBERS\n");
-
-                } else if (token.length() == 1 && operators.contains(token.charAt(0))) {
+                } else if (operators.contains(token.charAt(0))) {
                     bw.write("Lexeme: " + token + " Token: OPERATORS\n");
-
                 } else if (token.length() == 1 && seperators.contains(token.charAt(0))) {
                     bw.write("Lexeme: " + token + " Token: SEPERATORS\n");
-
                 } else if (token.matches("[a-zA-Z_][a-zA-Z0-9_]*")) {
                     bw.write("Lexeme: " + token + " Token: IDENTIFIER\n");
-
                 } else if (token.matches("\".*\"")) {
                     bw.write("Lexeme: " + token + " Token: STRING_LITERALS\n");
-
                 } else {
                     bw.write("Lexeme: " + token + " Token: UNKNOWN\n");
                 }
