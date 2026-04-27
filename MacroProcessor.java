@@ -1,11 +1,21 @@
 import java.io.*;
 import java.util.*;
 
+class MNTEntry {
+    String name;
+    int mdtp;
+
+    MNTEntry(String name, int mdtp) {
+        this.name = name;
+        this.mdtp = mdtp;
+    }
+}
+
 public class MacroProcessor {
 
-    static List<String> MDT = new ArrayList<>(); // Macro Definition Table
-    static Map<String, Integer> MNT = new HashMap<>(); // Macro Name Table
-    static List<String> ALA = new ArrayList<>(); // Argument List Array
+    static List<String> MDT = new ArrayList<>();
+    static Map<String, MNTEntry> MNT = new HashMap<>();
+    static List<String> ALA = new ArrayList<>(); // stores dummy args
 
     public static void main(String[] args) throws Exception {
         String inputFile = "sample.asm";
@@ -15,9 +25,8 @@ public class MacroProcessor {
         pass2(inputFile, outputFile);
     }
 
-    // PASS 1: Process Macro Definitions
+    // ---------------- PASS 1 ----------------
     static void pass1(String fileName) throws Exception {
-
         BufferedReader br = new BufferedReader(new FileReader(fileName));
         String line;
         boolean insideMacro = false;
@@ -27,22 +36,28 @@ public class MacroProcessor {
         while ((line = br.readLine()) != null) {
             line = line.trim();
 
-            // Detect MACRO
+            // Detect macro start
             if (line.contains("MACRO")) {
                 insideMacro = true;
 
-                String macroName = line.split(" ")[0];
-                MNT.put(macroName, MDT.size());
+                String[] parts = line.split("\\s+");
 
-                System.out.println("\nMacro Name Table:");
-                System.out.println("Index\tName");
-                System.out.println((MNT.size() - 1) + "\t" + macroName);
+                String macroName = parts[0]; // DISP
+                MNT.put(macroName, new MNTEntry(macroName, MDT.size()));
 
+                // Extract dummy arguments (skip "MACRO")
+                for (int i = 2; i < parts.length; i++) {
+                    String[] args = parts[i].split(",");
+                    for (String arg : args) {
+                        ALA.add(arg.trim());
+                    }
+                }
                 continue;
             }
 
             // End of macro
             if (insideMacro && line.equals("ENDM")) {
+                MDT.add("MEND");
                 insideMacro = false;
                 continue;
             }
@@ -51,36 +66,34 @@ public class MacroProcessor {
             if (insideMacro) {
                 MDT.add(line);
             }
-
-            // Build ALA (simple logic)
-            if (line.startsWith("DISP")) {
-                String arg = line.split(" ")[1];
-                if (!ALA.contains(arg)) {
-                    ALA.add(arg);
-                }
-            }
         }
 
         br.close();
 
-        // Print ALA
-        System.out.println("\nArgument List Array:");
+        // Print MNT
+        System.out.println("\nMacro Name Table (MNT):");
+        System.out.println("Name\tMDTP");
+        for (String key : MNT.keySet()) {
+            System.out.println(key + "\t" + MNT.get(key).mdtp);
+        }
+
+        // Print ALA (dummy args)
+        System.out.println("\nArgument List Array (Dummy Args):");
         System.out.println("Index\tArgument");
         for (int i = 0; i < ALA.size(); i++) {
             System.out.println(i + "\t" + ALA.get(i));
         }
 
         // Print MDT
-        System.out.println("\nMacro Definition Table:");
+        System.out.println("\nMacro Definition Table (MDT):");
         System.out.println("Index\tDefinition");
         for (int i = 0; i < MDT.size(); i++) {
             System.out.println(i + "\t" + MDT.get(i));
         }
     }
 
-    // PASS 2: Expand Macros
+    // ---------------- PASS 2 ----------------
     static void pass2(String inputFile, String outputFile) throws Exception {
-
         BufferedReader br = new BufferedReader(new FileReader(inputFile));
         BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile));
 
@@ -92,6 +105,7 @@ public class MacroProcessor {
         while ((line = br.readLine()) != null) {
             line = line.trim();
 
+            // Skip macro definitions
             if (line.contains("MACRO")) {
                 insideMacro = true;
                 continue;
@@ -102,24 +116,46 @@ public class MacroProcessor {
                 continue;
             }
 
-            if (insideMacro)
-                continue;
+            if (insideMacro) continue;
 
-            // Macro Call Handling
-            if (line.startsWith("DISP")) {
+            String[] parts = line.split("\\s+");
+            String opcode = parts[0];
 
-                String arg = line.split(" ")[1];
+            // If macro call
+            if (MNT.containsKey(opcode)) {
 
-                for (String def : MDT) {
-                    if (def.contains("XX")) {
-                        def = def.replace("XX", arg);
+                Map<String, String> actualALA = new HashMap<>();
+
+                // Get actual arguments
+                if (parts.length > 1) {
+                    String[] actualArgs = parts[1].split(",");
+
+                    for (int i = 0; i < actualArgs.length; i++) {
+                        actualALA.put(ALA.get(i), actualArgs[i].trim());
+                    }
+                }
+
+                int mdtp = MNT.get(opcode).mdtp;
+
+                // Expand macro
+                for (int i = mdtp; i < MDT.size(); i++) {
+                    String def = MDT.get(i);
+
+                    if (def.equals("MEND"))
+                        break;
+
+                    // Replace dummy with actual
+                    for (String dummy : actualALA.keySet()) {
+                        def = def.replace(dummy, actualALA.get(dummy));
                     }
 
                     System.out.println(def);
                     bw.write(def);
                     bw.newLine();
                 }
+
             } else {
+                // Normal line
                 System.out.println(line);
                 bw.write(line);
                 bw.newLine();
