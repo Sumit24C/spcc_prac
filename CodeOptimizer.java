@@ -1,12 +1,3 @@
-
-/*
-A = B + C
-D = B + C
-E = A * 2
-F = 5 + 3
-G = F + E
-end
-*/
 import java.util.*;
 
 public class CodeOptimizer {
@@ -30,7 +21,7 @@ public class CodeOptimizer {
         }
     }
 
-    // Parse input into instructions
+    // ================= PARSE =================
     static List<Instruction> parseInput(List<String> code) {
         List<Instruction> list = new ArrayList<>();
 
@@ -46,14 +37,10 @@ public class CodeOptimizer {
 
                 String op = "";
 
-                if (rhs.contains("+"))
-                    op = "+";
-                else if (rhs.contains("-"))
-                    op = "-";
-                else if (rhs.contains("*"))
-                    op = "*";
-                else if (rhs.contains("/"))
-                    op = "/";
+                if (rhs.contains("+")) op = "+";
+                else if (rhs.contains("-")) op = "-";
+                else if (rhs.contains("*")) op = "*";
+                else if (rhs.contains("/")) op = "/";
 
                 String[] operands = rhs.split("\\" + op);
                 list.add(new Instruction(lhs, operands[0], op, operands[1]));
@@ -65,7 +52,7 @@ public class CodeOptimizer {
         return list;
     }
 
-    // Common Subexpression Elimination
+    // ================= CSE =================
     static List<Instruction> commonSubexpression(List<Instruction> code) {
         Map<String, String> map = new HashMap<>();
         List<Instruction> optimized = new ArrayList<>();
@@ -84,33 +71,10 @@ public class CodeOptimizer {
                 optimized.add(ins);
             }
         }
-
         return optimized;
     }
 
-    // Dead Code Elimination
-    static List<Instruction> deadCodeElimination(List<Instruction> code) {
-        Set<String> used = new HashSet<>();
-
-        for (Instruction ins : code) {
-            if (ins.op1 != null)
-                used.add(ins.op1);
-            if (ins.op2 != null)
-                used.add(ins.op2);
-        }
-
-        List<Instruction> optimized = new ArrayList<>();
-
-        for (Instruction ins : code) {
-            if (used.contains(ins.lhs)) {
-                optimized.add(ins);
-            }
-        }
-
-        return optimized;
-    }
-
-    // Strength Reduction (e.g., x * 2 → x + x)
+    // ================= STRENGTH REDUCTION =================
     static List<Instruction> strengthReduction(List<Instruction> code) {
         List<Instruction> optimized = new ArrayList<>();
 
@@ -123,33 +87,65 @@ public class CodeOptimizer {
             }
             optimized.add(ins);
         }
-
         return optimized;
     }
 
-    // Frequency Reduction
+    // ================= FREQUENCY REDUCTION =================
+    // FIX: Only reorder PURE constant expressions safely (no dependency break)
     static List<Instruction> frequencyReduction(List<Instruction> code) {
         List<Instruction> constants = new ArrayList<>();
         List<Instruction> others = new ArrayList<>();
 
         for (Instruction ins : code) {
-            if (isConstant(ins.op1) && isConstant(ins.op2)) {
+            if (ins.operator != null &&
+                isConstant(ins.op1) && isConstant(ins.op2)) {
                 constants.add(ins);
             } else {
                 others.add(ins);
             }
         }
 
-        constants.addAll(others);
-        return constants;
+        // Move constants safely to top
+        List<Instruction> result = new ArrayList<>();
+        result.addAll(constants);
+        result.addAll(others);
+
+        return result;
     }
 
     static boolean isConstant(String s) {
-        if (s == null)
-            return false;
+        if (s == null) return false;
         return s.matches("\\d+");
     }
 
+    // ================= DEAD CODE ELIMINATION =================
+    // FIX: Proper backward liveness analysis
+    static List<Instruction> deadCodeElimination(List<Instruction> code) {
+
+        Set<String> live = new HashSet<>();
+        List<Instruction> optimized = new ArrayList<>();
+
+        // Assume LAST variable is output → must be kept
+        if (!code.isEmpty()) {
+            live.add(code.get(code.size() - 1).lhs);
+        }
+
+        // Traverse backward
+        for (int i = code.size() - 1; i >= 0; i--) {
+            Instruction ins = code.get(i);
+
+            if (live.contains(ins.lhs)) {
+                optimized.add(0, ins);
+
+                if (ins.op1 != null) live.add(ins.op1);
+                if (ins.op2 != null) live.add(ins.op2);
+            }
+        }
+
+        return optimized;
+    }
+
+    // ================= PRINT =================
     static void printCode(String title, List<Instruction> code) {
         System.out.println("\n" + title);
         for (Instruction ins : code) {
@@ -157,6 +153,7 @@ public class CodeOptimizer {
         }
     }
 
+    // ================= MAIN =================
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         List<String> input = new ArrayList<>();
