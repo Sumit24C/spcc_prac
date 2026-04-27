@@ -1,3 +1,13 @@
+
+/*
+A = B + C
+D = B + C
+E = A * 2
+F = 5 + 3
+G = F + E
+end
+*/
+
 import java.util.*;
 
 public class CodeOptimizer {

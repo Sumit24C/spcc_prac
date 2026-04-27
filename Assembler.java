@@ -76,7 +76,7 @@ class Assembler {
             else if (m.equals("DS")) {
                 int val = Integer.parseInt(op1.replace("F", ""));
                 pass1.add(String.valueOf(val));
-                literalTable.add(new Literal(op1, LC));
+                // literalTable.add(new Literal(op1, LC));
                 LC += val * 4;
             }
 
@@ -126,8 +126,9 @@ class Assembler {
         String label = "-", m = "-", op1 = "-", op2 = "-";
 
         String[] t = line.trim().split("\\s+");
-        if (t.length == 0)
+        if (t.length == 0) {
             return new String[] { label, m, op1, op2 };
+        }
 
         if (MOT.containsKey(t[0]) || POT.contains(t[0])) {
             m = t[0];
@@ -137,8 +138,9 @@ class Assembler {
                     String[] o = t[1].split(",");
                     op1 = o[0];
                     op2 = o.length > 1 ? o[1] : "-";
-                } else
+                } else {
                     op1 = t[1];
+                }
             }
         } else {
             label = t[0];

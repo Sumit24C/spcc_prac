@@ -1,7 +1,7 @@
-JOHN    START   0
+PRG    START   0
         USING   *,15
-        L       1,FIVE
-        A       1,FOUR
+        L       1,FOUR
+        A       1,FIVE
         ST      1,TEMP
 FOUR    DC      F'4'
 FIVE    DC      F'5'
