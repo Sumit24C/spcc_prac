@@ -1,22 +1,3 @@
-/*
-IP: x = a + b * c + d * e
-OP:     
-quadraple
-Op   Arg1 Arg2 Result
-*    b    c    t1
-+    a    t1   t2
-*    d    e    t3
-+    t2   t3   t4
-=    t4   -    x
-
-triple
-(0)  *   b   c
-(1)  +   a   (0)
-(2)  *   d   e
-(3)  +   (1) (2)
-(4)  =   x   (3)
-*/
-
 import java.util.*;
 
 class Quadruple {
@@ -47,10 +28,9 @@ public class IntermediateCodeGen {
     static int tempCount = 1;
 
     static int precedence(char op) {
-        if (op == '+' || op == '-')
-            return 1;
-        if (op == '*' || op == '/')
-            return 2;
+        if (op == '~') return 3;   // unary minus
+        if (op == '*' || op == '/') return 2;
+        if (op == '+' || op == '-') return 1;
         return 0;
     }
 
@@ -116,24 +96,38 @@ public class IntermediateCodeGen {
             }
 
             else {
-                // Quadruple
-                String qArg2 = quadStack.pop();
-                String qArg1 = quadStack.pop();
-                String temp = "t" + (tempCount++);
+                if (token.equals("~")) {
+                    // unary operator
 
-                quads.add(new Quadruple(token, qArg1, qArg2, temp));
-                quadStack.push(temp);
+                    String arg = quadStack.pop();
+                    String temp = "t" + (tempCount++);
 
-                // Triple
-                String tArg2 = tripleStack.pop();
-                String tArg1 = tripleStack.pop();
+                    quads.add(new Quadruple("uminus", arg, "-", temp));
+                    quadStack.push(temp);
 
-                triples.add(new Triple(token, tArg1, tArg2));
-                tripleStack.push("(" + (triples.size() - 1) + ")");
+                    String tArg = tripleStack.pop();
+                    triples.add(new Triple("uminus", tArg, "-"));
+                    tripleStack.push("(" + (triples.size() - 1) + ")");
+                } else {
+                    // binary operator
+
+                    String qArg2 = quadStack.pop();
+                    String qArg1 = quadStack.pop();
+                    String temp = "t" + (tempCount++);
+
+                    quads.add(new Quadruple(token, qArg1, qArg2, temp));
+                    quadStack.push(temp);
+
+                    String tArg2 = tripleStack.pop();
+                    String tArg1 = tripleStack.pop();
+
+                    triples.add(new Triple(token, tArg1, tArg2));
+                    tripleStack.push("(" + (triples.size() - 1) + ")");
+                }
             }
         }
 
-        // Final assignment
+        // final assignment
         String finalQuadVal = quadStack.pop();
         quads.add(new Quadruple("=", finalQuadVal, "-", lhs.trim()));
 
@@ -145,14 +139,13 @@ public class IntermediateCodeGen {
 
         Scanner sc = new Scanner(System.in);
 
-        System.out.println("Enter expression (e.g., a = b * c + d):");
+        System.out.println("Enter expression (use ~ for unary minus):");
         String input = sc.nextLine();
 
         String[] parts = input.split("=");
 
         generateIntermediateCode(infixToPostfix(parts[1]), parts[0]);
 
-        // Quadruples
         System.out.println("\n--- Quadruple Table ---");
         System.out.println("Op\tArg1\tArg2\tResult");
 
@@ -160,7 +153,6 @@ public class IntermediateCodeGen {
             System.out.println(q.op + "\t" + q.arg1 + "\t" + q.arg2 + "\t" + q.result);
         }
 
-        // Triples
         System.out.println("\n--- Triple Table ---");
         System.out.println("Index\tOp\tArg1\tArg2");
 

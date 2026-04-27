@@ -3,7 +3,7 @@ int main(){
     int a,b=5;
     printf("\n Welcome");
     // sample input
-    while (a > 0) {
+    while (a >= 0) {
         a--;
     } 
     getch();
