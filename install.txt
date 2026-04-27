@@ -1,0 +1,5 @@
+sudo apt install flex
+
+flex lex.l -> generates lex.yy.c
+gcc lex.yy.c -o op -ll -> generates op
+./op -> executes the code
